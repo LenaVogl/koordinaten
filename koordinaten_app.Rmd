@@ -1,7 +1,8 @@
 ---
+title: "Koordinaten"
 output: 
   flexdashboard::flex_dashboard:
-    orientation: rows
+    orientation: columns
     social: menu
     source_code: https://github.com/LenaVogl/koordinaten
 runtime: shiny
@@ -56,6 +57,7 @@ library(sf)
 library(leaflet)
 library(maptools)
 library(flexdashboard)
+library(shiny)
 #library(raster)
 #library(bslib)
 
