@@ -1,11 +1,10 @@
 ---
-title: "Koordinatensuche"
-output:
+output: 
   flexdashboard::flex_dashboard:
-  orientation: columns
-  vertical_layout: fill
-  runtime: shiny
-  
+    orientation: rows
+    social: menu
+    source_code: https://github.com/LenaVogl/koordinaten
+runtime: shiny
 ---
   
   
@@ -33,8 +32,6 @@ output:
   font-size: 48px;
 }
 
-
-
 body {
   background-color: #eee6e7;
 }
@@ -54,14 +51,13 @@ knitr::opts_chunk$set(echo = TRUE)
 #load("//kvb/dfs/Verfahren/SPSS/PRD/STA/Analysen/01_Regelthemen/Bedarfsplanung/Geomarkets/Workspace.RData")
 
 library(tidyverse)
-library(DT)
+#library(DT)
 library(sf)
 library(leaflet)
 library(maptools)
 library(flexdashboard)
-library(raster)
-library(sf)
-library(bslib)
+#library(raster)
+#library(bslib)
 
 
 ```
@@ -69,14 +65,13 @@ library(bslib)
 
 Column {data-width=350 .sidebar }
 ----------------------------------------------------------------------
-  
-  
+
   
 <br></p>
   
 ### Beschreibung
   
-Hier können Koordinaten in ETRS89 oder WGS84 auf der Karte eingezeichnet werden. Es muss immer das korrekte Koordinatensystem des Punktes angegeben werden.
+Hier lassen sich Koordinaten in ETRS89 oder WGS84 auf der Karte einzeichnen. Es muss immer das korrekte Koordinatensystem des Punktes angegeben werden.
 
 
 ### Bitte Auswahl treffen
@@ -86,7 +81,7 @@ Hier können Koordinaten in ETRS89 oder WGS84 auf der Karte eingezeichnet werden
 #sidebarPanel(
 
 selectInput("Koord",
-            "Koordinatensystem des Punkts auswählen",
+            "Koordinatensystem des Punkts",
             choices = c("WGS84", "ETRS89"),
             selected = "ETRS89")
 
@@ -104,14 +99,13 @@ actionButton(inputId = "go", label="Anzeigen", class="btn-primary btn-sm", icon 
 
 ```
 
-### Hintergrund ändern
+### Hintergrund anpassen
 
-Es stehen verschiedene Karten zur Auswahl.
 
 ```{r user_select_bg, echo = FALSE}
 
 selectInput("Hintergrund",
-            "Hintergrund",
+            "Es stehen verschiedene Karten zur Auswahl:",
             choices = c("Esri.WorldGrayCanvas","Esri.WorldImagery","CartoDB.Positron","Esri.WorldTopoMap"),
             selected = "Esri.WorldImagery", multiple = F)
 
@@ -133,15 +127,11 @@ Punkte <- eventReactive(input$go, {
     Punktlayer <-  st_transform(Punktlayer, crs = 4326) # ETRS89 / UTM zone 32N : 25832
   }
   
-  
   Punkt <- data.frame(coordinates(sf::as_Spatial(Punktlayer)))
   
   Punkt
   
 })
-
-
-
 
 
 Punkte_ETRS <- eventReactive(input$go, {
@@ -170,15 +160,12 @@ if(input$Koord =="WGS84")
 &nbsp;
 
 
-Column {data-width=600}
+Column {data-width=500}
 ----------------------------------------------------------------------
-  
   
 ### Karte
   
 ```{r, echo = FALSE}
-
-
 
 output$mymap = leaflet::renderLeaflet({
   leaflet() %>%
@@ -188,8 +175,6 @@ output$mymap = leaflet::renderLeaflet({
                lat = ~coords.x2
     )
   
-  
-  
 })
 
 leafletOutput('mymap', height=800)
@@ -198,67 +183,54 @@ leafletOutput('mymap', height=800)
 ```
 
 
-Column {data-width=50}
+Column {data-width=150}
 ----------------------------------------------------------------------
   
-  
-  
-### WGS 84
-  
+### WGS84 X
+
 ```{r, echo = FALSE}
 
+ renderValueBox({
+   valueBox(as.numeric(Punkte()$coords.x1),
+            icon = 'fa-x',
+            color = "#abbe9f")
+ })
 
+```
+
+### WGS84 Y
+
+```{r, echo = FALSE}
 
 renderValueBox({
-  valueBox(as.numeric(Punkte()$coords.x1),
-           icon = 'fa-x',
-           color = "#abbe9f")
-  
-})
-
+   valueBox(as.numeric(Punkte()$coords.x2),
+            icon = 'fa-y',
+            color = "#abbe9f")
+ })
 ```
 
 
 
-### WGS 84
+### ETRS89 X
 
 ```{r, echo = FALSE}
 
 renderValueBox({
-  
-  valueBox(as.numeric(Punkte()$coords.x2),
-           icon = 'fa-y',
-           color = "#abbe9f")
+   valueBox(as.numeric(Punkte_ETRS()$coords.x1),
+            icon = 'fa-x',
+            color = "#9fabbe")
 })
-
 ```
 
 
-
-### ETRS89
+### ETRS89 Y
 
 ```{r, echo = FALSE}
 
+ renderValueBox({
+   valueBox(as.numeric(Punkte_ETRS()$coords.x2),
+            icon = 'fa-y',
+          color = "#9fabbe")
 
-
-renderValueBox({
-  valueBox(as.numeric(Punkte_ETRS()$coords.x1),
-           icon = 'fa-x',
-           color = "#9fabbe")
-  
-})
-
+ })
 ```
-
-
-
-### ETRS89
-
-```{r, echo = FALSE}
-
-renderValueBox({
-  valueBox(as.numeric(Punkte_ETRS()$coords.x2),
-           icon = 'fa-y',
-           color = "#9fabbe")
-  
-})
