@@ -1,0 +1,264 @@
+---
+title: "Koordinatensuche"
+output:
+  flexdashboard::flex_dashboard:
+  orientation: columns
+  vertical_layout: fill
+  runtime: shiny
+  
+---
+  
+  
+<style>                   
+
+.navbar {
+    background-color: #8c757e;
+    border-color: #aba2a7;
+  }
+  
+.section.sidebar {
+  background-color: #d6cfcf;
+  border-color: #d6cfcf;
+}
+
+.value-box .value {
+    color: white;
+    font-size: 24px;
+}
+.value-box .caption {
+    color: white;
+}
+
+.value-box .icon .fa {
+  font-size: 48px;
+}
+
+
+
+body {
+  background-color: #eee6e7;
+}
+
+
+
+</style>    
+  
+  
+  <!-- #A67D8E;   -->
+
+  
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+
+#load("//kvb/dfs/Verfahren/SPSS/PRD/STA/Analysen/01_Regelthemen/Bedarfsplanung/Geomarkets/Workspace.RData")
+
+library(tidyverse)
+library(DT)
+library(sf)
+library(leaflet)
+library(maptools)
+library(flexdashboard)
+library(raster)
+library(sf)
+library(bslib)
+
+
+```
+
+
+Column {data-width=350 .sidebar }
+----------------------------------------------------------------------
+  
+  
+  
+<br></p>
+  
+### Beschreibung
+  
+Hier können Koordinaten in ETRS89 oder WGS84 auf der Karte eingezeichnet werden. Es muss immer das korrekte Koordinatensystem des Punktes angegeben werden.
+
+
+### Bitte Auswahl treffen
+
+```{r user_select, echo = FALSE}
+
+#sidebarPanel(
+
+selectInput("Koord",
+            "Koordinatensystem des Punkts auswählen",
+            choices = c("WGS84", "ETRS89"),
+            selected = "ETRS89")
+
+numericInput(inputId = "X",
+             "X-Koordinate",
+             value = 676406)
+
+numericInput(inputId = "Y",
+             "Y-Koordinate",
+             value = 5293612)
+
+
+actionButton(inputId = "go", label="Anzeigen", class="btn-primary btn-sm", icon =icon("refresh"), width = NULL)
+
+
+```
+
+### Hintergrund ändern
+
+Es stehen verschiedene Karten zur Auswahl.
+
+```{r user_select_bg, echo = FALSE}
+
+selectInput("Hintergrund",
+            "Hintergrund",
+            choices = c("Esri.WorldGrayCanvas","Esri.WorldImagery","CartoDB.Positron","Esri.WorldTopoMap"),
+            selected = "Esri.WorldImagery", multiple = F)
+
+
+```
+
+```{r, include=FALSE}
+
+Punkte <- eventReactive(input$go, {
+  Punktlayer <- data.frame(X=input$X,Y=input$Y)
+  coordinates(Punktlayer)<-~X+Y
+  proj4string(Punktlayer) <- CRS("+init=epsg:25832")
+  Punktlayer <- Punktlayer %>% sf::st_as_sf()
+  
+  
+  
+  if(input$Koord =="ETRS89")
+  {
+    Punktlayer <-  st_transform(Punktlayer, crs = 4326) # ETRS89 / UTM zone 32N : 25832
+  }
+  
+  
+  Punkt <- data.frame(coordinates(sf::as_Spatial(Punktlayer)))
+  
+  Punkt
+  
+})
+
+
+
+
+
+Punkte_ETRS <- eventReactive(input$go, {
+  Punktlayer <- data.frame(X=input$X,Y=input$Y)
+  coordinates(Punktlayer)<-~X+Y
+  proj4string(Punktlayer) <- CRS("+init=epsg:25832")
+  Punktlayer <- Punktlayer %>% sf::st_as_sf()
+  
+  
+if(input$Koord =="WGS84")
+  { Punktlayer <- data.frame(X=input$X,Y=input$Y)
+  coordinates(Punktlayer)<-~X+Y
+  proj4string(Punktlayer) <- CRS("+init=epsg:4326")
+  Punktlayer <- Punktlayer %>% sf::st_as_sf()
+  Punktlayer <-  st_transform(Punktlayer, crs = 25832) # ETRS89 / UTM zone 32N : 25832
+  }
+  
+    Punkt <- data.frame(coordinates(sf::as_Spatial(Punktlayer)))
+  
+    Punkt
+  
+})
+
+```
+
+&nbsp;
+
+
+Column {data-width=600}
+----------------------------------------------------------------------
+  
+  
+### Karte
+  
+```{r, echo = FALSE}
+
+
+
+output$mymap = leaflet::renderLeaflet({
+  leaflet() %>%
+    addProviderTiles(input$Hintergrund)%>%
+    addMarkers(data = Punkte(),
+               lng = ~coords.x1,
+               lat = ~coords.x2
+    )
+  
+  
+  
+})
+
+leafletOutput('mymap', height=800)
+
+
+```
+
+
+Column {data-width=50}
+----------------------------------------------------------------------
+  
+  
+  
+### WGS 84
+  
+```{r, echo = FALSE}
+
+
+
+renderValueBox({
+  valueBox(as.numeric(Punkte()$coords.x1),
+           icon = 'fa-x',
+           color = "#abbe9f")
+  
+})
+
+```
+
+
+
+### WGS 84
+
+```{r, echo = FALSE}
+
+renderValueBox({
+  
+  valueBox(as.numeric(Punkte()$coords.x2),
+           icon = 'fa-y',
+           color = "#abbe9f")
+})
+
+```
+
+
+
+### ETRS89
+
+```{r, echo = FALSE}
+
+
+
+renderValueBox({
+  valueBox(as.numeric(Punkte_ETRS()$coords.x1),
+           icon = 'fa-x',
+           color = "#9fabbe")
+  
+})
+
+```
+
+
+
+### ETRS89
+
+```{r, echo = FALSE}
+
+renderValueBox({
+  valueBox(as.numeric(Punkte_ETRS()$coords.x2),
+           icon = 'fa-y',
+           color = "#9fabbe")
+  
+})
