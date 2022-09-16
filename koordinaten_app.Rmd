@@ -26,7 +26,7 @@ runtime: shiny
     font-size: 24px;
 }
 .value-box .caption {
-    color: white;
+    color: #eee6e7;
 }
 
 .value-box .icon .fa {
@@ -49,11 +49,53 @@ library(maptools)
 library(flexdashboard)
 library(shiny)
 
+```
+
+```{r, include=FALSE}
+
+Punkte <- eventReactive(input$go, {
+  Punktlayer <- data.frame(X=input$X,Y=input$Y)
+  coordinates(Punktlayer)<-~X+Y
+  proj4string(Punktlayer) <- CRS("+init=epsg:25832")
+  Punktlayer <- Punktlayer %>% sf::st_as_sf()
+  
+  
+  
+  if(input$Koord =="ETRS89")
+  {
+    Punktlayer <-  st_transform(Punktlayer, crs = 4326) # ETRS89 / UTM zone 32N : 25832
+  }
+  
+  Punkt <- data.frame(coordinates(sf::as_Spatial(Punktlayer)))
+  Punkt
+  
+})
+
+
+Punkte_ETRS <- eventReactive(input$go, {
+  Punktlayer <- data.frame(X=input$X,Y=input$Y)
+  coordinates(Punktlayer)<-~X+Y
+  proj4string(Punktlayer) <- CRS("+init=epsg:25832")
+  Punktlayer <- Punktlayer %>% sf::st_as_sf()
+  
+  
+if(input$Koord =="WGS84")
+  { Punktlayer <- data.frame(X=input$X,Y=input$Y)
+  coordinates(Punktlayer)<-~X+Y
+  proj4string(Punktlayer) <- CRS("+init=epsg:4326")
+  Punktlayer <- Punktlayer %>% sf::st_as_sf()
+  Punktlayer <-  st_transform(Punktlayer, crs = 25832) # ETRS89 / UTM zone 32N : 25832
+  }
+  
+    Punkt <- data.frame(coordinates(sf::as_Spatial(Punktlayer)))
+    Punkt
+  
+})
 
 ```
 
 
-Column {data-width=350 .sidebar }
+Column {data-width=300 .sidebar }
 ----------------------------------------------------------------------
 
 
@@ -101,55 +143,9 @@ selectInput("Hintergrund",
 
 ```
 
-```{r, include=FALSE}
-
-Punkte <- eventReactive(input$go, {
-  Punktlayer <- data.frame(X=input$X,Y=input$Y)
-  coordinates(Punktlayer)<-~X+Y
-  proj4string(Punktlayer) <- CRS("+init=epsg:25832")
-  Punktlayer <- Punktlayer %>% sf::st_as_sf()
-  
-  
-  
-  if(input$Koord =="ETRS89")
-  {
-    Punktlayer <-  st_transform(Punktlayer, crs = 4326) # ETRS89 / UTM zone 32N : 25832
-  }
-  
-  Punkt <- data.frame(coordinates(sf::as_Spatial(Punktlayer)))
-  
-  Punkt
-  
-})
 
 
-Punkte_ETRS <- eventReactive(input$go, {
-  Punktlayer <- data.frame(X=input$X,Y=input$Y)
-  coordinates(Punktlayer)<-~X+Y
-  proj4string(Punktlayer) <- CRS("+init=epsg:25832")
-  Punktlayer <- Punktlayer %>% sf::st_as_sf()
-  
-  
-if(input$Koord =="WGS84")
-  { Punktlayer <- data.frame(X=input$X,Y=input$Y)
-  coordinates(Punktlayer)<-~X+Y
-  proj4string(Punktlayer) <- CRS("+init=epsg:4326")
-  Punktlayer <- Punktlayer %>% sf::st_as_sf()
-  Punktlayer <-  st_transform(Punktlayer, crs = 25832) # ETRS89 / UTM zone 32N : 25832
-  }
-  
-    Punkt <- data.frame(coordinates(sf::as_Spatial(Punktlayer)))
-  
-    Punkt
-  
-})
-
-```
-
-&nbsp;
-
-
-Column {data-width=500}
+Column {data-width=550}
 ----------------------------------------------------------------------
   
 ### Karte

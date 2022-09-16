@@ -5,7 +5,7 @@ account: lenavogl
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 7031081
-bundleId: 6308399
+bundleId: 6308659
 url: https://lenavogl.shinyapps.io/koordinaten/
-when: 1663319955.33615
-lastSyncTime: 1663319955.33616
+when: 1663325400.05443
+lastSyncTime: 1663325400.05445
