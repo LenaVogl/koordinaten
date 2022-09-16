@@ -96,7 +96,7 @@ numericInput(inputId = "Y",
              value = 51.533920)
 
 
-actionButton(inputId = "go", label="anzeigen", class="btn-primary btn-sm", icon =icon("refresh"), width = NULL)
+actionButton(inputId = "go", label="Auf der Karte anzeigen", class="btn-primary btn-sm", icon =icon("refresh"), width = NULL)
 
 
 ```
