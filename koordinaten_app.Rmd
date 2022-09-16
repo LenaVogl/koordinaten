@@ -85,15 +85,15 @@ Hier lassen sich Koordinaten in ETRS89 oder WGS84 auf der Karte einzeichnen. Es 
 selectInput("Koord",
             "Koordinatensystem des Punkts",
             choices = c("WGS84", "ETRS89"),
-            selected = "ETRS89")
+            selected = "WGS84")
 
 numericInput(inputId = "X",
              "X-Koordinate",
-             value = 676406)
+             value = 9.937966)
 
 numericInput(inputId = "Y",
-             "Y-Koordinate",
-             value = 5293612)
+             "Y-Koordinate", 
+             value = 51.533920)
 
 
 actionButton(inputId = "go", label="Anzeigen", class="btn-primary btn-sm", icon =icon("refresh"), width = NULL)
